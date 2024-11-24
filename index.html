@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MIDIファイル バイナリ変換</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        #output {
+            width: 100%;
+            height: 150px;
+            margin-top: 20px;
+            font-family: monospace;
+            overflow-y: auto;
+        }
+        button {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MIDIファイルをバイナリに変換</h1>
+    <input type="file" id="fileInput" accept=".mid,.midi" />
+    <textarea id="output" readonly placeholder="ここにバイナリデータが表示されます"></textarea><br>
+    <button id="copyButton" disabled>コピーする</button>
+    <p id="status"></p>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const output = document.getElementById('output');
+        const copyButton = document.getElementById('copyButton');
+        const status = document.getElementById('status');
+
+        // Web Workerのセットアップ
+        const worker = new Worker('worker.js');
+
+        worker.onmessage = (event) => {
+            const { type, data } = event.data;
+
+            if (type === 'progress') {
+                // 進捗表示
+                status.textContent = `処理中... ${data}% 完了`;
+            } else if (type === 'result') {
+                // 処理結果を表示
+                output.value = data;
+                copyButton.disabled = false;
+                status.textContent = '完了しました！';
+            }
+        };
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) {
+                alert('MIDIファイルを選択してください');
+                return;
+            }
+
+            // 状態をリセット
+            output.value = '';
+            copyButton.disabled = true;
+            status.textContent = '処理を開始しています...';
+
+            // ファイルを読み込む
+            const reader = new FileReader();
+            reader.onload = () => {
+                const arrayBuffer = reader.result;
+                worker.postMessage({ type: 'process', arrayBuffer });
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // コピー機能
+        copyButton.addEventListener('click', () => {
+            if (output.value) {
+                navigator.clipboard.writeText(output.value).then(() => {
+                    alert('コピーしました！');
+                }).catch(() => {
+                    alert('コピーに失敗しました');
+                });
+            } else {
+                alert('バイナリデータがありません');
+            }
+        });
+    </script>
+</body>
+</html>
