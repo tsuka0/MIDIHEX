@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MIDIファイル バイナリ変換</title>
+    <title>MIDIfile2hex by hevean</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -16,9 +16,9 @@
     </style>
 </head>
 <body>
-    <h1>MIDIファイルをバイナリに変換</h1>
+    <h1>MIDI File to HEX by @hevean_3 </h1>
     <input type="file" id="fileInput" accept=".mid,.midi" />
-    <button id="copyButton" disabled>バイナリをコピーする</button>
+    <button id="copyButton" disabled>COPY</button>
     <p id="status"></p>
 
     <script>
@@ -41,21 +41,21 @@
                 // バイナリデータを保存
                 binaryData = data;
                 copyButton.disabled = false;
-                status.textContent = '変換が完了しました！コピー可能です。';
+                status.textContent = 'finish!';
             }
         };
 
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (!file) {
-                alert('MIDIファイルを選択してください');
+                alert('select MIDI...');
                 return;
             }
 
             // 状態をリセット
             binaryData = '';
             copyButton.disabled = true;
-            status.textContent = '処理を開始しています...';
+            status.textContent = 'loading...';
 
             // ファイルを読み込む
             const reader = new FileReader();
@@ -70,12 +70,12 @@
         copyButton.addEventListener('click', () => {
             if (binaryData) {
                 navigator.clipboard.writeText(binaryData).then(() => {
-                    alert('バイナリデータをコピーしました！');
+                    alert('copy!');
                 }).catch(() => {
-                    alert('コピーに失敗しました');
+                    alert('copy error');
                 });
             } else {
-                alert('バイナリデータがありません');
+                alert('no data');
             }
         });
     </script>
